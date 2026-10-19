@@ -196,3 +196,30 @@ Code in this repo (GitLab omitted per supervisor); screenshots of AWS resources 
 - [x] SSH tests passed: local -> bastion (10.0.1.160) -> private (10.0.2.240)
 - [x] Screenshots taken by user (VPC resource map, SSH hop, console)
 - [x] Stack deleted with approval; describe-stacks reports it does not exist; no VPC or instance tagged FinalAct1 remains. Retained: key pair Daga-ang-KeyPair-FinalAct1 and local .pem (not part of stack).
+
+## After both activities: demo and defense materials (done)
+Both activities are complete and their stacks are deleted. Next came materials to
+present and defend the work. Nothing below is deployed; all of it is local docs.
+- `demo-act1.md`: pitch, concepts, live demo script, likely Q&A and honest caveats for Activity 1
+- `demo-final-act1.md`: same for Final Activity 1 (architecture sketch, SG referencing, bastion, ssh -A / -J)
+- `demo-commands.md`: copy-paste commands for both demos (validate, change set, execute,
+  outputs, SSH/S3 tests, teardown). Uses `export AWS_PROFILE=cloud-basics-sso
+  AWS_DEFAULT_REGION=ap-southeast-1` and a fresh `MYIP` each time.
+- Activity 1 demo on this Mac: its original key pair's .pem is only on the old Windows
+  machine, so the demo commands pass `KeyName=Daga-ang-KeyPair-FinalAct1` instead.
+- Redeploying for a live demo is a new change set with a fresh `MyIp`, needs explicit
+  approval per step, and the stack must be deleted right after (~$0.50-$1/day).
+
+## Git state
+- Remote `origin`: GitHub (`alfrancisdagaang/cloud-immersion`). GitLab was waived by the supervisor.
+- `1358d57` (template + notes) was pushed by the user with `! git push origin main`.
+- `c621a61` (demo docs) is committed locally and NOT pushed (user chose not to push yet).
+- Claude's own `git push` was blocked by the auto-mode classifier even with chat approval;
+  the user pushes with `!` or adds a `Bash(git push ...)` permission rule.
+- The repo contains the AWS account ID and role name in this file; check GitHub
+  visibility (private is preferable).
+
+## Still retained in AWS / locally
+- Key pairs `Daga-ang-KeyPair-Act1` and `Daga-ang-KeyPair-FinalAct1` (free, not in any stack)
+- `~/.ssh/Daga-ang-KeyPair-FinalAct1.pem` (never print, copy, commit or move)
+- Delete only if the user explicitly asks.

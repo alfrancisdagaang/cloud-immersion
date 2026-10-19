@@ -139,6 +139,7 @@ and `describe-stacks` returned "Stack with id Daga-ang-Stack-Act1 does not exist
 ## Planned files
 - `cloud-basics-act1.yaml`: the CloudFormation template
 - `CLAUDE.md`: this file; update the progress checklist after each stage
+- `demo-act1.md`, `demo-final-act1.md`: demo and defense guides for each activity (written)
 
 ---
 

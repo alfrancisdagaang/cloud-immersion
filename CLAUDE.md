@@ -139,3 +139,59 @@ and `describe-stacks` returned "Stack with id Daga-ang-Stack-Act1 does not exist
 ## Planned files
 - `cloud-basics-act1.yaml`: the CloudFormation template
 - `CLAUDE.md`: this file; update the progress checklist after each stage
+
+---
+
+# FINAL ACTIVITY 1 — Bastion + Private EC2 (current work)
+
+Activity 1 above is finished and kept for reference. Everything below applies
+to the current task. Where they conflict, this section wins.
+
+## Objective
+CloudFormation stack with a bastion/jump host (EC2 in public subnet) and an EC2 in
+a private subnet. SSH from local machine -> bastion -> private instance.
+GitLab upload is OMITTED (supervisor confirmed). Keep code in this repo only; do not
+change remotes without asking.
+
+## Environment changes (now on macOS)
+- Shell: zsh on macOS. Project dir: `/Users/alfrancis.dagaang/Developer/cloud-immersion`
+- AWS profile `cloud-basics-sso` re-created on this Mac; same account and role.
+- Region: `ap-southeast-1`. Always pass `--profile cloud-basics-sso --region ap-southeast-1`.
+- cfn-lint: optional (not installed yet).
+
+## Requirements
+- VPC `10.0.0.0/16`; public subnet `10.0.1.0/24`; private subnet `10.0.2.0/24`
+  (activity text says /16 for subnets, which is impossible; /24 assumed, confirm w/ mentor)
+- IGW + public route table; private route table with no internet route; no NAT Gateway
+- Bastion `t2.micro` in public subnet with public IP
+- Private `t2.micro` in private subnet, no public IP
+- Bastion SG: SSH 22 from my public IP `/32` only (`MyIp` parameter, check fresh before deploy)
+- Private SG: SSH 22 only from the Bastion SG (source security group, not a CIDR)
+- AL2023 AMI via SSM parameter; no hardcoded AMI ID
+- Reach private host via agent forwarding (`ssh -A`) or ProxyJump (`-J`); never copy
+  the .pem onto the bastion
+
+## Tags
+- Stack tag (required by sandbox policy): `ProjectCode=FinalAct1-CloudIntern`
+- Every taggable resource: `Name=Daga-ang-{ResourceType}-FinalAct1`, `ProjectCode=FinalAct1-CloudIntern`
+- Only touch resources with that ProjectCode or named `Daga-ang-*-FinalAct1`.
+
+## Names
+- Stack: `Daga-ang-Stack-FinalAct1`; change set: `Daga-ang-ChangeSet-FinalAct1`
+- Template: `final-act1.yaml` (NEW file; never overwrite `cloud-basics-act1.yaml`)
+- Key pair: `Daga-ang-KeyPair-FinalAct1` (`key-0a85406b463df87aa`)
+- Private key: `~/.ssh/Daga-ang-KeyPair-FinalAct1.pem` (chmod 400). Never print, copy, commit, or move it.
+
+## Deliverables
+Code in this repo (GitLab omitted per supervisor); screenshots of AWS resources (taken by user); delete stack afterwards.
+
+## Final Act progress
+- [x] AWS CLI installed; SSO profile recreated; identity verified (CloudNewbies, 000179588365)
+- [x] Key pair `Daga-ang-KeyPair-FinalAct1` created, private key saved locally
+- [x] GitLab upload omitted (supervisor said it is not required)
+- [x] `final-act1.yaml` drafted, reviewed, written
+- [x] Template validated with validate-template (no errors, no IAM capability needed, MyIp has no default); cfn-lint not run
+- [x] Change set previewed (14 resources, all Add) and executed with approval; stack CREATE_COMPLETE. VPC vpc-0c41b933730c5d805, bastion 18.141.225.230, private 10.0.2.240 (IPs change if stopped/started)
+- [x] SSH tests passed: local -> bastion (10.0.1.160) -> private (10.0.2.240)
+- [x] Screenshots taken by user (VPC resource map, SSH hop, console)
+- [x] Stack deleted with approval; describe-stacks reports it does not exist; no VPC or instance tagged FinalAct1 remains. Retained: key pair Daga-ang-KeyPair-FinalAct1 and local .pem (not part of stack).

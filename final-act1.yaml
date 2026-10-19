@@ -1,0 +1,189 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Final Activity 1 - VPC with a public subnet (bastion host) and a private
+  subnet (private EC2). SSH is allowed to the bastion from one IP only, and to
+  the private instance from the bastion only.
+
+Parameters:
+  MyIp:
+    Type: String
+    Description: Your current public IPv4 address (no mask). /32 is added automatically.
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$'
+    ConstraintDescription: Must be a valid IPv4 address (each part 0-255) such as 203.0.113.10
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: Daga-ang-KeyPair-FinalAct1
+    Description: Existing EC2 key pair used for SSH.
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Latest Amazon Linux 2023 AMI, resolved at deploy time.
+
+Resources:
+  # ---------------- Networking ----------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - { Key: Name, Value: Daga-ang-VPC-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - { Key: Name, Value: Daga-ang-InternetGateway-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - { Key: Name, Value: Daga-ang-PublicSubnet-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - { Key: Name, Value: Daga-ang-PrivateSubnet-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - { Key: Name, Value: Daga-ang-PublicRouteTable-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # Private subnet: own route table, local routing only (no NAT Gateway, by design)
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - { Key: Name, Value: Daga-ang-PrivateRouteTable-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  # ---------------- Security ----------------
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH to bastion from my public IP only
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Sub "${MyIp}/32"
+          Description: SSH from my current public IP
+      Tags:
+        - { Key: Name, Value: Daga-ang-BastionSecurityGroup-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PrivateSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH to private instance from the bastion security group only
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSecurityGroup
+          Description: SSH from the bastion host only
+      Tags:
+        - { Key: Name, Value: Daga-ang-PrivateSecurityGroup-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  # ---------------- Compute ----------------
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: PublicDefaultRoute
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref LatestAmiId
+      KeyName: !Ref KeyName
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required # enforce IMDSv2
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          AssociatePublicIpAddress: true
+          SubnetId: !Ref PublicSubnet
+          GroupSet:
+            - !Ref BastionSecurityGroup
+      Tags:
+        - { Key: Name, Value: Daga-ang-BastionInstance-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+  PrivateInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref LatestAmiId
+      KeyName: !Ref KeyName
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required # enforce IMDSv2
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          AssociatePublicIpAddress: false
+          SubnetId: !Ref PrivateSubnet
+          GroupSet:
+            - !Ref PrivateSecurityGroup
+      Tags:
+        - { Key: Name, Value: Daga-ang-PrivateInstance-FinalAct1 }
+        - { Key: ProjectCode, Value: FinalAct1-CloudIntern }
+
+Outputs:
+  VpcId:
+    Value: !Ref VPC
+  BastionPublicIp:
+    Value: !GetAtt BastionInstance.PublicIp
+  PrivateInstanceIp:
+    Value: !GetAtt PrivateInstance.PrivateIp
+  SshBastion:
+    Description: SSH from your Mac to the bastion (with agent forwarding)
+    Value: !Sub "ssh -A -i ~/.ssh/Daga-ang-KeyPair-FinalAct1.pem ec2-user@${BastionInstance.PublicIp}"
+  SshPrivateViaJump:
+    Description: SSH from your Mac to the private instance through the bastion
+    Value: !Sub "ssh -i ~/.ssh/Daga-ang-KeyPair-FinalAct1.pem -J ec2-user@${BastionInstance.PublicIp} ec2-user@${PrivateInstance.PrivateIp}"

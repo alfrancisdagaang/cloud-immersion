@@ -139,7 +139,7 @@ and `describe-stacks` returned "Stack with id Daga-ang-Stack-Act1 does not exist
 ## Planned files
 - `cloud-basics-act1.yaml`: the CloudFormation template
 - `CLAUDE.md`: this file; update the progress checklist after each stage
-- `demo-act1.md`, `demo-final-act1.md`: demo and defense guides for each activity (written)
+- `act1-guide.md`, `final-act1-guide.md`: walkthrough and defense guides for each activity (written)
 
 ---
 
@@ -197,17 +197,17 @@ Code in this repo (GitLab omitted per supervisor); screenshots of AWS resources 
 - [x] Screenshots taken by user (VPC resource map, SSH hop, console)
 - [x] Stack deleted with approval; describe-stacks reports it does not exist; no VPC or instance tagged FinalAct1 remains. Retained: key pair Daga-ang-KeyPair-FinalAct1 and local .pem (not part of stack).
 
-## After both activities: demo and defense materials (done)
+## After both activities: walkthrough and defense materials (done)
 Both activities are complete and their stacks are deleted. Next came materials to
 present and defend the work. Nothing below is deployed; all of it is local docs.
-- `demo-act1.md`: pitch, concepts, live demo script, likely Q&A and honest caveats for Activity 1
-- `demo-final-act1.md`: same for Final Activity 1 (architecture sketch, SG referencing, bastion, ssh -A / -J)
-- `demo-commands.md`: copy-paste commands for both demos (validate, change set, execute,
+- `act1-guide.md`: pitch, concepts, live walkthrough script, likely Q&A and honest caveats for Activity 1
+- `final-act1-guide.md`: same for Final Activity 1 (architecture sketch, SG referencing, bastion, ssh -A / -J)
+- `deploy-commands.md`: copy-paste commands for both activities (validate, change set, execute,
   outputs, SSH/S3 tests, teardown). Uses `export AWS_PROFILE=cloud-basics-sso
   AWS_DEFAULT_REGION=ap-southeast-1` and a fresh `MYIP` each time.
-- Activity 1 demo on this Mac: its original key pair's .pem is only on the old Windows
-  machine, so the demo commands pass `KeyName=Daga-ang-KeyPair-FinalAct1` instead.
-- Redeploying for a live demo is a new change set with a fresh `MyIp`, needs explicit
+- Activity 1 on this Mac: its original key pair's .pem is only on the old Windows
+  machine, so the deploy commands pass `KeyName=Daga-ang-KeyPair-FinalAct1` instead.
+- Redeploying for a live walkthrough is a new change set with a fresh `MyIp`, needs explicit
   approval per step, and the stack must be deleted right after (~$0.50-$1/day).
 
 ## Git state

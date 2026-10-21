@@ -1,4 +1,4 @@
-# Demo Guide — Final Activity 1 (Bastion host + private EC2)
+# Guide — Final Activity 1 (Bastion host + private EC2)
 
 ## 30-second pitch
 "I built a VPC with CloudFormation where the only door in is a bastion host in the
@@ -42,7 +42,7 @@ Internet --(SSH 22, my IP /32 only)--> [Bastion  10.0.1.x, public subnet]
 - **Change set:** Previewed 14 resources, all Add, before executing.
 - **Parameters:** MyIp has no default on purpose, so I must check it fresh at each deploy.
 
-## Live demo script (5 min)
+## Live walkthrough script (5 min)
 1. Show the template: SGs first, because they are the heart of the design.
 2. VPC resource map: two subnets, two route tables, one IGW, only the public side routed.
 3. Show the bastion SG (22 from my /32) and the private SG (22 from the bastion SG).

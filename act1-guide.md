@@ -1,4 +1,4 @@
-# Demo Guide — Activity 1 (VPC + EC2 + S3 + IAM role)
+# Guide — Activity 1 (VPC + EC2 + S3 + IAM role)
 
 ## 30-second pitch
 "I used one CloudFormation template to build a VPC with a public and a private
@@ -38,7 +38,7 @@ it with a change set, tested it, then deleted the stack."
   reviewed it before executing.
 - **IMDSv2 required:** Blocks a class of SSRF attacks that steal role credentials.
 
-## Live demo script (5 min)
+## Live walkthrough script (5 min)
 1. Show the template: parameters, then network, then security group, then IAM policy.
 2. Show the stack in the console, with its resources and the ProjectCode tag.
 3. Show the VPC resource map: public subnet to IGW, private subnet with no route out.

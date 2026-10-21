@@ -1,12 +1,12 @@
-# Demo Commands — step by step (Activity 1 and Final Activity 1)
+# Deployment Commands — step by step (Activity 1 and Final Activity 1)
 
-Run these from the project folder in the Mac terminal. Both demos deploy real
-resources (about $0.50-$1/day), so redeploy only when ready to present, and
+Run these from the project folder in the Mac terminal. Both activities deploy real
+resources (about $0.50-$1/day), so deploy only when ready, and
 delete the stack right after.
 
-Companion docs: `demo-act1.md`, `demo-final-act1.md` (concepts and Q&A).
+Companion docs: `act1-guide.md`, `final-act1-guide.md` (concepts and Q&A).
 
-## Common setup (both demos)
+## Common setup (both activities)
 
 ```bash
 cd ~/Developer/cloud-immersion
@@ -16,7 +16,7 @@ aws sts get-caller-identity                    # should show account 00017958836
 MYIP=$(curl -s https://checkip.amazonaws.com); echo $MYIP   # check this fresh each time
 ```
 
-## Demo 1: Activity 1
+## Activity 1
 
 **Key pair warning.** The Act 1 key pair's private key was saved on the old
 Windows machine, so it is not on this Mac. The simplest fix is to pass the Final
@@ -58,7 +58,7 @@ On the instance, proving the IAM role with no stored credentials:
 ```bash
 B=daga-ang-bucket-act1-000179588365-ap-southeast-1
 aws s3 ls s3://$B                              # list
-echo "demo" > t.txt
+echo "test" > t.txt
 aws s3 cp t.txt s3://$B/t.txt                  # upload
 aws s3 cp s3://$B/t.txt back.txt && cat back.txt   # download and compare
 aws s3 rm s3://$B/t.txt                        # delete
@@ -75,7 +75,7 @@ aws cloudformation wait stack-delete-complete --stack-name Daga-ang-Stack-Act1
 aws cloudformation describe-stacks --stack-name Daga-ang-Stack-Act1   # expect "does not exist"
 ```
 
-## Demo 2: Final Activity 1
+## Final Activity 1
 
 ```bash
 # 1. Validate
@@ -124,11 +124,11 @@ aws cloudformation wait stack-delete-complete --stack-name Daga-ang-Stack-FinalA
 aws cloudformation describe-stacks --stack-name Daga-ang-Stack-FinalAct1   # expect "does not exist"
 ```
 
-## Tips for the live session
+## Tips
 - **Reusing change set names:** `create-change-set` fails if that name already exists
   on a live stack. If a previous attempt failed, delete that stack first.
 - **If SSH times out:** the public IP changed. Re-run `MYIP=...`, then create an
   UPDATE change set (`--change-set-type UPDATE`) with the new IP, or redeploy.
 - **Known-hosts warnings:** new instances get new host keys. `ssh-keygen -R <ip>`
   clears an old entry if an address is reused.
-- **Delete when done.** Run the teardown right after the demo.
+- **Delete when done.** Run the teardown right after you finish.
